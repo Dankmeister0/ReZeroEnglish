@@ -6,12 +6,13 @@ for (let i = 0; i < readChapters.length; ++i) {
 	aElem.className = "secondary";
 }
 
+if (document.cookie == "") document.cookie = "|";
 const list = document.getElementById("list").children;
 for (let i = 0; i < list.length; ++i) {
 	const aElem = list.item(i).firstChild;
 	if (aElem == null) continue;
 	aElem.onclick = () => {
 		if (document.cookie.indexOf(`|${aElem.id}|`) > -1) return;
-		document.cookie = document.cookie + "|" + aElem.id;
+		document.cookie = document.cookie + aElem.id + "|";
 	};
 }
