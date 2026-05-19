@@ -33,6 +33,7 @@ function setupHandlers() {
 	const readAllButton = document.getElementById("readAll");
 	readAllButton.onclick = () => {
 		for (const elem of listEntries) {
+			if (elem.parentNode.getAttribute("style") == "display: none;") continue;
 			readChapter(elem.id);
 			elem.className = "secondary";
 		}
@@ -40,8 +41,9 @@ function setupHandlers() {
 
 	const unreadAllButton = document.getElementById("readNone");
 	unreadAllButton.onclick = () => {
-		document.cookie = "chapters=|";
 		for (const elem of listEntries) {
+			if (elem.parentNode.getAttribute("style") == "display: none;") continue;
+			document.cookie = document.cookie.replace(`|${elem.id}|`, "|");
 			elem.className = "";
 		}
 	}
@@ -52,6 +54,15 @@ function setupArcFilters() {
 	for (let i = 0; i < list.length; ++i) {
 		const aElem = list.item(i).firstChild;
 		if (aElem == null) continue;
+		if (aElem.id == "allFilter") {
+			aElem.onclick = () => {
+				for (const elem of listEntries) {
+					elem.parentNode.removeAttribute("style");
+				}
+			}
+			continue;
+		}
+
 		aElem.onclick = () => {
 			const filterText = aElem.textContent;
 			for (const elem of listEntries) {
