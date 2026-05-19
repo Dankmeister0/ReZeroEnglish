@@ -5,6 +5,7 @@ const listEntries = [];
 initListEntries();
 grayOutReadChapters();
 setupHandlers();
+setupArcFilters();
 
 function initListEntries() {
 	const list = document.getElementById("list").children;
@@ -43,6 +44,25 @@ function setupHandlers() {
 		for (const elem of listEntries) {
 			elem.className = "";
 		}
+	}
+}
+
+function setupArcFilters() {
+	const list = document.getElementById("filters").children;
+	for (let i = 0; i < list.length; ++i) {
+		const aElem = list.item(i).firstChild;
+		if (aElem == null) continue;
+		aElem.onclick = () => {
+			const filterText = aElem.textContent;
+			for (const elem of listEntries) {
+				if (elem.textContent.indexOf(filterText) > -1) {
+					elem.parentNode.removeAttribute("style");
+				}
+				else {
+					elem.parentNode.setAttribute("style", "display: none;");
+				}
+			}
+		};
 	}
 }
 
