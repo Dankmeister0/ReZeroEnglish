@@ -299,7 +299,7 @@ function tableOfContents() {
             switch (_b.label) {
                 case 0:
                     tocRef = RatchetReact.New("ul");
-                    return [4 /*yield*/, fetch("../public/index.txt")];
+                    return [4 /*yield*/, fetch("./chapters/index.txt")];
                 case 1:
                     resp = _b.sent();
                     return [4 /*yield*/, resp.text()];
@@ -317,7 +317,7 @@ function tableOfContents() {
                                         addChapterToCookie(chapter);
                                         gHandlers.openChapter(chapter);
                                     };
-                                    return [4 /*yield*/, fetch("../public/".concat(chapter, ".txt"))];
+                                    return [4 /*yield*/, fetch("./chapters/".concat(chapter, ".txt"))];
                                 case 1:
                                     resp = _c.sent();
                                     return [4 /*yield*/, resp.text()];
@@ -448,13 +448,13 @@ function readerNavBar(chapter) {
                     prevButtonRef = RatchetReact.New("span");
                     nextButtonRef = RatchetReact.New("span");
                     homeButtonRef = RatchetReact.New("a").set("href", "#").set("onclick", function () { return gHandlers.openTOC(); });
-                    return [4 /*yield*/, fetch("../public/".concat(chapterNum - 1, ".txt"))];
+                    return [4 /*yield*/, fetch("./chapters/".concat(chapterNum - 1, ".txt"))];
                 case 1:
                     resp = _a.sent();
                     if (resp.ok) {
                         prevButtonRef = RatchetReact.New("a").set("href", "#").set("onclick", function () { return gHandlers.openChapter("".concat(chapterNum - 1)); });
                     }
-                    return [4 /*yield*/, fetch("../public/".concat(chapterNum + 1, ".txt"))];
+                    return [4 /*yield*/, fetch("./chapters/".concat(chapterNum + 1, ".txt"))];
                 case 2:
                     resp = _a.sent();
                     if (resp.ok) {
@@ -485,7 +485,7 @@ function readerContent(chapter) {
             switch (_b.label) {
                 case 0:
                     divRef = RatchetReact.New("div");
-                    return [4 /*yield*/, fetch("../public/".concat(chapter, ".txt"))];
+                    return [4 /*yield*/, fetch("./chapters/".concat(chapter, ".txt"))];
                 case 1:
                     resp = _b.sent();
                     if (!resp.ok)
