@@ -254,6 +254,7 @@ function main() {
         articleRef.close();
     };
     gHandlers.openChapter = function (chapter) {
+        addChapterToCookie(chapter);
         articleRef.elem().replaceChildren();
         articleRef.open();
         articleRef.addAsync(readerNavBar(chapter));
@@ -293,7 +294,7 @@ function tocNavBar() {
 }
 function tableOfContents() {
     return __awaiter(this, void 0, void 0, function () {
-        var tocRef, aRef, resp, text, chapters, _loop_1, chapters_1, chapters_1_1, chapter, e_2_1;
+        var tocRef, aRef, resp, text, chapters, _loop_1, chapters_1, chapters_1_1, chapterStr;
         var e_2, _a;
         return __generator(this, function (_b) {
             switch (_b.label) {
@@ -305,65 +306,38 @@ function tableOfContents() {
                     return [4 /*yield*/, resp.text()];
                 case 2:
                     text = _b.sent();
-                    chapters = text.split(",").sort().reverse();
-                    _loop_1 = function (chapter) {
-                        var onClick, chapterTitle;
-                        return __generator(this, function (_c) {
-                            switch (_c.label) {
-                                case 0:
-                                    if (chapter.trim().length === 0)
-                                        return [2 /*return*/, "continue"];
-                                    onClick = function () {
-                                        addChapterToCookie(chapter);
-                                        gHandlers.openChapter(chapter);
-                                    };
-                                    return [4 /*yield*/, fetch("./src/chapters/".concat(chapter, ".txt"))];
-                                case 1:
-                                    resp = _c.sent();
-                                    return [4 /*yield*/, resp.text()];
-                                case 2:
-                                    text = _c.sent();
-                                    chapterTitle = text.split("\n")[0];
-                                    aRef = RatchetReact.New("a");
-                                    tocRef.open()
-                                        .add("li").open()
-                                        .addRef(aRef).set("id", chapter).set("textContent", chapterTitle).set("href", "#").set("onclick", onClick)
-                                        .close()
-                                        .close();
-                                    if (isChapterInCookie(chapter)) {
-                                        aRef.get("classList").add("secondary");
-                                    }
-                                    return [2 /*return*/];
-                            }
-                        });
+                    chapters = text.split("\n").reverse();
+                    _loop_1 = function (chapterStr) {
+                        var chapter = chapterStr.split("|", 2)[0];
+                        var chapterTitle = chapterStr.split("|", 2)[1];
+                        if (chapter.trim().length === 0)
+                            return "continue";
+                        var onClick = function () {
+                            gHandlers.openChapter(chapter);
+                        };
+                        aRef = RatchetReact.New("a");
+                        tocRef.open()
+                            .add("li").open()
+                            .addRef(aRef).set("id", chapter).set("textContent", chapterTitle).set("href", "#").set("onclick", onClick)
+                            .close()
+                            .close();
+                        if (isChapterInCookie(chapter)) {
+                            aRef.get("classList").add("secondary");
+                        }
                     };
-                    _b.label = 3;
-                case 3:
-                    _b.trys.push([3, 8, 9, 10]);
-                    chapters_1 = __values(chapters), chapters_1_1 = chapters_1.next();
-                    _b.label = 4;
-                case 4:
-                    if (!!chapters_1_1.done) return [3 /*break*/, 7];
-                    chapter = chapters_1_1.value;
-                    return [5 /*yield**/, _loop_1(chapter)];
-                case 5:
-                    _b.sent();
-                    _b.label = 6;
-                case 6:
-                    chapters_1_1 = chapters_1.next();
-                    return [3 /*break*/, 4];
-                case 7: return [3 /*break*/, 10];
-                case 8:
-                    e_2_1 = _b.sent();
-                    e_2 = { error: e_2_1 };
-                    return [3 /*break*/, 10];
-                case 9:
                     try {
-                        if (chapters_1_1 && !chapters_1_1.done && (_a = chapters_1.return)) _a.call(chapters_1);
+                        for (chapters_1 = __values(chapters), chapters_1_1 = chapters_1.next(); !chapters_1_1.done; chapters_1_1 = chapters_1.next()) {
+                            chapterStr = chapters_1_1.value;
+                            _loop_1(chapterStr);
+                        }
                     }
-                    finally { if (e_2) throw e_2.error; }
-                    return [7 /*endfinally*/];
-                case 10:
+                    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+                    finally {
+                        try {
+                            if (chapters_1_1 && !chapters_1_1.done && (_a = chapters_1.return)) _a.call(chapters_1);
+                        }
+                        finally { if (e_2) throw e_2.error; }
+                    }
                     gHandlers.markAllRead = function () {
                         var e_3, _a;
                         try {

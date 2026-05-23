@@ -1,7 +1,7 @@
 #!/bin/bash
 # Makes sure that chapter's titles are in the proper format
 
-for file in ../chapters/*.txt; do
+for file in ../src/chapters/*.txt; do
 	if [ -f "$file" ]; then
 		read -r first_line < "$file"
 

@@ -38,6 +38,7 @@ function main(): RatchetReact<HTMLElement> {
 	};
 
 	gHandlers.openChapter = (chapter: string) => {
+		addChapterToCookie(chapter);
 		articleRef.elem().replaceChildren();
 		articleRef.open();
 		articleRef.addAsync(readerNavBar(chapter));
@@ -90,19 +91,17 @@ async function tableOfContents(): Promise<RatchetReact<HTMLElement>> {
 	const tocRef = RatchetReact.New("ul");
 	let aRef: RatchetReact<HTMLAnchorElement>;
 
-	let resp = await fetch("./src/chapters/index.txt");
-	let text = await resp.text();
-	const chapters = text.split(",").sort().reverse();
-	for (const chapter of chapters) {
+	const resp = await fetch("./src/chapters/index.txt");
+	const text = await resp.text();
+	const chapters = text.split("\n").reverse();
+	for (const chapterStr of chapters) {
+		const chapter = chapterStr.split("|", 2)[0];
+		const chapterTitle = chapterStr.split("|", 2)[1];
+
 		if (chapter.trim().length === 0) continue;
 		const onClick = () => {
-			addChapterToCookie(chapter);
 			gHandlers.openChapter(chapter);
 		}
-
-		resp = await fetch(`./src/chapters/${chapter}.txt`);
-		text = await resp.text();
-		const chapterTitle = text.split("\n")[0];
 
 		aRef = RatchetReact.New("a");
 		tocRef.open()

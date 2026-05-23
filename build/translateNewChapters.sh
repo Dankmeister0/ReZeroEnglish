@@ -19,7 +19,7 @@ MAX_CHAPTER=$(echo "${MAX_CHAPTER}" | awk '{print $2}')
 MAX_CHAPTER=$(echo "${MAX_CHAPTER}" | head -n 1)
 
 for ((i="${MAX_CHAPTER}"; i>0; i--)); do
-	if [ -f "../chapters/${i}.txt" ]; then
+	if [ -f "../src/chapters/${i}.txt" ]; then
 		break
 	fi
 	./translateChapter.sh ${i} $1
