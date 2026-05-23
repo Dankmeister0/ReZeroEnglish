@@ -20,7 +20,9 @@ jobs:
       - name: Run Script
         run: |
           cd ./build
-          bash ./translateNewChapters.sh "${{ inputs.gemini_api_key }}"
+          chmod +x ./translateNewChapters.sh
+          chmod +x ./buildIndex.sh
+          ./translateNewChapters.sh "${{ inputs.gemini_api_key }}"
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
