@@ -1,0 +1,28 @@
+name: Translate New Chapters
+
+on:
+  workflow_dispatch:
+    inputs:
+      gemini_api_key:
+        description: 'API key from Google AI Studio'
+        required: true
+        type: string
+
+jobs:
+  execute-and-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Script
+        run: ./build/translateNewChapter.sh
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@://github.com"
+          git add .
+          git diff-index --quiet HEAD || git commit -m "Automated data update"
+          git push
