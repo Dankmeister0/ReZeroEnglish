@@ -90,7 +90,7 @@ async function tableOfContents(): Promise<RatchetReact<HTMLElement>> {
 	const tocRef = RatchetReact.New("ul");
 	let aRef: RatchetReact<HTMLAnchorElement>;
 
-	let resp = await fetch("../chapters/index.txt");
+	let resp = await fetch("../public/index.txt");
 	let text = await resp.text();
 	const chapters = text.split(",").sort().reverse();
 	for (const chapter of chapters) {
@@ -100,7 +100,7 @@ async function tableOfContents(): Promise<RatchetReact<HTMLElement>> {
 			gHandlers.openChapter(chapter);
 		}
 
-		resp = await fetch(`../chapters/${chapter}.txt`);
+		resp = await fetch(`../public/${chapter}.txt`);
 		text = await resp.text();
 		const chapterTitle = text.split("\n")[0];
 
@@ -159,11 +159,11 @@ async function readerNavBar(chapter: string): Promise<RatchetReact<HTMLElement>>
 	let nextButtonRef: RatchetReact<HTMLElement> = RatchetReact.New("span");
 	const homeButtonRef = RatchetReact.New("a").set("href", "#").set("onclick", () => gHandlers.openTOC());
 
-	let resp = await fetch(`../chapters/${chapterNum - 1}.txt`);
+	let resp = await fetch(`../public/${chapterNum - 1}.txt`);
 	if (resp.ok) {
 		prevButtonRef = RatchetReact.New("a").set("href", "#").set("onclick", () => gHandlers.openChapter(`${chapterNum - 1}`))
 	}
-	resp = await fetch(`../chapters/${chapterNum + 1}.txt`);
+	resp = await fetch(`../public/${chapterNum + 1}.txt`);
 	if (resp.ok) {
 		nextButtonRef = RatchetReact.New("a").set("href", "#").set("onclick", () => gHandlers.openChapter(`${chapterNum + 1}`))
 	}
@@ -188,7 +188,7 @@ async function readerNavBar(chapter: string): Promise<RatchetReact<HTMLElement>>
 async function readerContent(chapter: string): Promise<RatchetReact<HTMLElement>> {
 	const divRef = RatchetReact.New("div");
 
-	const resp = await fetch(`../chapters/${chapter}.txt`);
+	const resp = await fetch(`../public/${chapter}.txt`);
 	if (!resp.ok) return divRef;
 	const text = await resp.text();
 	const lines = text.split("\n");
