@@ -18,7 +18,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run Script
-        run: bash ./build/translateNewChapters.sh "${{ inputs.gemini_api_key }}"
+        run: |
+          cd ./build
+          bash ./translateNewChapters.sh "${{ inputs.gemini_api_key }}"
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
