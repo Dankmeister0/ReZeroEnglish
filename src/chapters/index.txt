@@ -1,4 +1,5 @@
 1|Arc 1 Prologue: "The Afterglow of the Beginning"
+2|Arc 1 Part 1: "The Serrated Ten-Yen Coin is Useless"
 269|Re:Zero EX: "Butterfly Dream (Kochou/Lust IF)"
 372|Re:Zero EX: "School Re:Zero! 1st Period! (Vainglory IF)"
 398|Re:Zero EX: "School Re:Zero! 2nd Period! (Vainglory IF)"
@@ -67,4 +68,5 @@
 778|Arc 10 Part 19: "An Enemy Too Large"
 779|Arc 10 Part 20: "Sheep-Mirror, Dog-Face"
 780|Arc 10 Part 21: "Six Tongues"
+782|Arc 10 Chapter 23: "Searching for the Best Path"
 
