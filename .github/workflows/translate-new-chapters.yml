@@ -20,8 +20,7 @@ jobs:
       - name: Run Script
         run: |
           cd ./build
-          chmod +x ./translateNewChapters.sh
-          chmod +x ./buildIndex.sh
+          chmod +x ./*.sh
           chmod +x ./bin/pup
           ./translateNewChapters.sh "${{ inputs.gemini_api_key }}"
       - name: Commit and push changes
