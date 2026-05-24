@@ -69,4 +69,5 @@ if [[ $(echo "${RESP}" | jq -r ".candidates[0].content.parts[0].text") == "null"
 fi
 
 echo "${RESP}" | jq -r ".candidates[0].content.parts[0].text" > "../src/chapters/${CHAPTER}.txt"
+./buildIndex.sh
 echo "Saved translation to ../src/chapters/${CHAPTER}.txt"

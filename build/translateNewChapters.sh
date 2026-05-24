@@ -24,5 +24,3 @@ for ((i="${MAX_CHAPTER}"; i>0; i--)); do
 	fi
 	./translateChapter.sh ${i} $1
 done
-
-./buildIndex.sh
