@@ -1,31 +1,42 @@
 import sys
 import requests
 from pathlib import Path
+from google import genai
 
 def getDir(relPath: str) -> str:
+	"""
+	Get the absolute path given a relative path
+	"""
 	path = str(Path(__file__).resolve().parent.parent)
 	path += "/" + relPath
 	return path
 
-def printUsage():
-	print("\nUsage: " + sys.argv[0] + " [command]\n")
-	print("\tchapter [number]")
-	print("\tnew")
-
 def buildIndex():
+	"""
+	Rebuilds src/chapters/index.txt
+	"""
 	output = ""
+	filenames: list[int] = []
 	folderPath = Path(getDir("src/chapters"))
 	for file in folderPath.rglob("*.txt"):
 		if file.stem == "index":
 			continue
-		output += file.stem + "|"
-		with file.open("r", encoding="utf-8") as fin:
+		filenames.append(int(file.stem))
+	
+	filenames.sort(reverse = True)
+	for file in filenames:
+		output += str(file) + "|"
+		with Path(getDir("src/chapters/" + str(file) + ".txt")).open("r", encoding="utf-8") as fin:
 			output += fin.readline().strip()
 		output += "\n"
 	with open(getDir("src/chapters/index.txt"), "w", encoding="utf-8") as fout:
 		fout.write(output)
 
 def buildProperNounMap():
+	"""
+	Rebuilds build/nouns.tsv
+	This file is a list of proper nouns used in Re:Zero in Japanese and English. This is used to improve the accuracy of spelling for names & related nouns.
+	"""
 	headers = {
 		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 	}
@@ -102,6 +113,10 @@ def buildProperNounMap():
 			fout.write(jp + "\t" + en + "\n")
 
 def loadNounMap() -> dict[str, str]:
+	"""
+	Loads the nouns from build/nouns.tsv
+	The key is the Japanese noun & the value is the English translation
+	"""
 	nounMap: dict[str, str] = {}
 	with open(getDir("build/nouns.tsv"), "r", encoding="utf-8") as fin:
 		for line in fin:
@@ -119,6 +134,9 @@ def loadNounMap() -> dict[str, str]:
 	return nounMap
 
 def getNewestChapter() -> str:
+	"""
+	Returns the most recent chapter id
+	"""
 	headers = {
 		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 	}
@@ -136,6 +154,9 @@ def getNewestChapter() -> str:
 	return chapter
 
 def getChapterText(chapter: str) -> str:
+	"""
+	Returns the raw Japanese text of a given chapter
+	"""
 	headers = {
 		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 	}
@@ -153,12 +174,18 @@ def getChapterText(chapter: str) -> str:
 	return text
 
 def replaceNounsJpText(text: str, nounMap: dict[str, str]) -> str:
+	"""
+	Replaces all the Japanese proper nouns with their English translation
+	"""
 	out = text
 	for jp, en in nounMap.items():
 		out = out.replace(jp, en)
 	return out
 
 def splitJpText(text: str, size: int) -> list[str]:
+	"""
+	Splits the input text into multiple peices of the given size
+	"""
 	sections: list[str] = []
 	while len(text) > 0:
 		idx = text.find("\n", size) + 1
@@ -169,6 +196,9 @@ def splitJpText(text: str, size: int) -> list[str]:
 	return sections
 
 def promptLocalModel(prompt: str, tokens: int) -> str:
+	"""
+	Prompts translategemma:12b using ollama
+	"""
 	payload: dict[str, str | bool | dict[str, int]] = {
 		"model": "translategemma:12b",
 		"stream": False,
@@ -185,7 +215,31 @@ def promptLocalModel(prompt: str, tokens: int) -> str:
 		except requests.exceptions.Timeout:
 			print("Request timed out, retrying.")
 
+def printGeminiModels(apiKey: str) -> None:
+	"""
+	Prints a full list of Gemini models
+	"""
+	geminiClient = genai.Client(api_key=apiKey)
+
+	for m in geminiClient.models.list():
+		if m.supported_actions is not None:
+			for action in m.supported_actions:
+				if action == "generateContent":
+					print(m.name)
+
+def promptGemini(apiKey: str, sysPrompt: str, jpText: str) -> str:
+	"""
+	Prompts Gemini using the given API key
+	"""
+	geminiClient = genai.Client(api_key=apiKey)
+	print(sysPrompt.format(text=jpText))
+	resp = geminiClient.models.generate_content(model="gemini-3.5-flash", contents=sysPrompt.format(text=jpText)) #type: ignore
+	return resp.text if resp.text is not None else ""
+
 def summarizeLocal(txt: str, tokens: int) -> str:
+	"""
+	Uses the local model to summarize the given text
+	"""
 	sysPrompt = (
 		"You are a part of a professional Japanese (ja) to English (en) translation team.\n"
 		"Your goal is to summarize the context of the given Japanese text.\n"
@@ -197,11 +251,14 @@ def summarizeLocal(txt: str, tokens: int) -> str:
 	return promptLocalModel(sysPrompt + txt, tokens)
 
 def translateLocal(chapter: str, tokens: int):
+	"""
+	Uses a local model to translate a given chapter
+	"""
 	nounMap = loadNounMap()
 	jpText = getChapterText(chapter)
 	jpText = replaceNounsJpText(jpText, nounMap)
 	jpText = splitJpText(jpText, int(tokens / 2))
-	sysPrompt = Path(getDir("build/systemPrompt.txt")).read_text(encoding="utf-8")
+	sysPrompt = Path(getDir("build/systemPromptLocal.txt")).read_text(encoding="utf-8")
 
 	cnt = 0
 	output = ""
@@ -218,15 +275,51 @@ def translateLocal(chapter: str, tokens: int):
 		print("Translation saved to ../src/chapters/" + chapter + ".txt")
 	buildIndex()
 
+def translateGemini(chapter: str, apiKey: str):
+	"""
+	Uses Gemini to translate a given chapter
+	"""
+	jpText = getChapterText(chapter)
+	sysPrompt = Path(getDir("build/systemPrompt.txt")).read_text(encoding="utf-8")
+
+	with open(getDir("src/chapters/" + chapter + ".txt"), "w", encoding="utf-8") as fout:
+		fout.write(promptGemini(apiKey, sysPrompt, jpText))
+		print("Translation saved to ../src/chapters/" + chapter + ".txt")
+	buildIndex()
+
+def printUsage():
+	"""
+	Prints the usage of this script
+	"""
+	print("\nUsage: " + sys.argv[0] + " [command]\n")
+	print("\tchapter [number] [api key] (Translates the given chapter using Gemini)")
+	print("\tlocal [number] [max tokens] (Translates the given chapter using a local model)")
+	print("\tindex (Rebuilds the index)")
+	print("\tlatest (Prints the latest chapter id)")
+
 if len(sys.argv) < 2:
 	printUsage()
 	sys.exit()
 
 if sys.argv[1] == "chapter":
+	if len(sys.argv) < 4:
+		printUsage()
+		sys.exit()
+	apiKey = sys.argv[3]
+	translateGemini(sys.argv[2], apiKey)
+
+if sys.argv[1] == "models":
 	if len(sys.argv) < 3:
 		printUsage()
 		sys.exit()
-	if len(sys.argv) > 4:
+	apiKey = sys.argv[2]
+	printGeminiModels(apiKey)
+
+if sys.argv[1] == "local":
+	if len(sys.argv) < 3:
+		printUsage()
+		sys.exit()
+	if len(sys.argv) > 3:
 		tokens = int(sys.argv[3])
 	else:
 		tokens = 4096
