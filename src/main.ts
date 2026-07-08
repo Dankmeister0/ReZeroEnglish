@@ -93,7 +93,7 @@ async function tableOfContents(): Promise<RatchetReact<HTMLElement>> {
 
 	const resp = await fetch("./src/chapters/index.txt");
 	const text = await resp.text();
-	const chapters = text.split("\n").reverse();
+	const chapters = text.split("\n");
 	for (const chapterStr of chapters) {
 		const chapter = chapterStr.split("|", 2)[0];
 		const chapterTitle = chapterStr.split("|", 2)[1];

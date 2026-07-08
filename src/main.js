@@ -306,7 +306,7 @@ function tableOfContents() {
                     return [4 /*yield*/, resp.text()];
                 case 2:
                     text = _b.sent();
-                    chapters = text.split("\n").reverse();
+                    chapters = text.split("\n");
                     _loop_1 = function (chapterStr) {
                         var chapter = chapterStr.split("|", 2)[0];
                         var chapterTitle = chapterStr.split("|", 2)[1];
