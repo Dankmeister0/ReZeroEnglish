@@ -78,6 +78,7 @@ function tocNavBar(): RatchetReact<HTMLElement> {
 						.add("option").set("textContent", "All")
 						.add("option").set("textContent", "Arc 10")
 						.add("option").set("textContent", "Arc 9")
+						.add("option").set("textContent", "Arc 1")
 						.add("option").set("textContent", "EX")
 					.close()
 				.close()
