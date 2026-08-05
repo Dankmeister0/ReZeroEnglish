@@ -30,6 +30,7 @@ jobs:
       - name: Activate virtual environment
         run: |
           python -m venv .venv
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
           source .venv/bin/activate
           pip install --upgrade pip
           pip install -r ./build/requirements.txt
