@@ -120,6 +120,7 @@ def loadNounMap() -> dict[str, str]:
 	nounMap: dict[str, str] = {}
 	with open(getDir("build/nouns.tsv"), "r", encoding="utf-8") as fin:
 		for line in fin:
+			line = line.rstrip('\n')
 			parts = line.split("\t")
 			if parts[0] == "" or parts[1] == "":
 				continue
@@ -132,6 +133,19 @@ def loadNounMap() -> dict[str, str]:
 			for i in range(0, len(partsJp)):
 				nounMap[partsJp[i]] = partsEn[i]
 	return nounMap
+
+def getRelevantNouns(jpText: str) -> str:
+	nounMap = loadNounMap()
+	relevantNouns: str = ""
+
+	for jpNoun, engNoun in nounMap.items():
+		if jpText.find(jpNoun) > -1:
+			relevantNouns += "\t- " + jpNoun + " → " + engNoun
+
+	if relevantNouns == "":
+		relevantNouns = "<NULL>\n"
+	return relevantNouns
+
 
 def getNewestChapter() -> str:
 	"""
@@ -173,48 +187,6 @@ def getChapterText(chapter: str) -> str:
 		text += resp.text[idx:resp.text.find("<", idx)] + "\n"
 	return text
 
-def replaceNounsJpText(text: str, nounMap: dict[str, str]) -> str:
-	"""
-	Replaces all the Japanese proper nouns with their English translation
-	"""
-	out = text
-	for jp, en in nounMap.items():
-		out = out.replace(jp, en)
-	return out
-
-def splitJpText(text: str, size: int) -> list[str]:
-	"""
-	Splits the input text into multiple peices of the given size
-	"""
-	sections: list[str] = []
-	while len(text) > 0:
-		idx = text.find("\n", size) + 1
-		if idx == 0:
-			idx = len(text)
-		sections.append(text[:idx])
-		text = text[idx:]
-	return sections
-
-def promptLocalModel(prompt: str, tokens: int) -> str:
-	"""
-	Prompts translategemma:12b using ollama
-	"""
-	payload: dict[str, str | bool | dict[str, int]] = {
-		"model": "translategemma:12b",
-		"stream": False,
-		"prompt": prompt,
-		"options": {
-			"num_ctx": tokens
-		}
-	}
-
-	while True:
-		try:
-			resp = requests.post("http://localhost:11434/api/generate", json=payload, timeout=180)
-			return resp.json()["response"] + "\n"
-		except requests.exceptions.Timeout:
-			print("Request timed out, retrying.")
-
 def printGeminiModels(apiKey: str) -> None:
 	"""
 	Prints a full list of Gemini models
@@ -227,63 +199,26 @@ def printGeminiModels(apiKey: str) -> None:
 				if action == "generateContent":
 					print(m.name)
 
-def promptGemini(apiKey: str, sysPrompt: str, jpText: str) -> str:
+def promptGemini(apiKey: str, prompt: str) -> str:
 	"""
 	Prompts Gemini using the given API key
 	"""
 	geminiClient = genai.Client(api_key=apiKey)
-	print(sysPrompt.format(text=jpText))
-	resp = geminiClient.models.generate_content(model="gemini-3.5-flash", contents=sysPrompt.format(text=jpText)) #type: ignore
+	resp = geminiClient.models.generate_content(model="gemini-3.5-flash", contents=prompt) #type: ignore
 	return resp.text if resp.text is not None else ""
-
-def summarizeLocal(txt: str, tokens: int) -> str:
-	"""
-	Uses the local model to summarize the given text
-	"""
-	sysPrompt = (
-		"You are a part of a professional Japanese (ja) to English (en) translation team.\n"
-		"Your goal is to summarize the context of the given Japanese text.\n"
-		"The context will be given to the translator to help them translate the next section accurately.\n"
-		"Describe the characters, setting, and tone as best as possible.\n"
-		"Produce ONLY your summary in English, without any additional explanations or commentary.\n"
-		"Please summarize the following Japanese text:\n\n"
-	)
-	return promptLocalModel(sysPrompt + txt, tokens)
-
-def translateLocal(chapter: str, tokens: int):
-	"""
-	Uses a local model to translate a given chapter
-	"""
-	nounMap = loadNounMap()
-	jpText = getChapterText(chapter)
-	jpText = replaceNounsJpText(jpText, nounMap)
-	jpText = splitJpText(jpText, int(tokens / 2))
-	sysPrompt = Path(getDir("build/systemPromptLocal.txt")).read_text(encoding="utf-8")
-
-	cnt = 0
-	output = ""
-	context = "<CONTEXT UNAVAILABLE>"
-	for txt in jpText:
-		cnt += 1
-		print("Translating section " + str(cnt))
-		output += promptLocalModel(sysPrompt.format(context=context, text=txt), tokens)
-		context = summarizeLocal(txt, tokens)
-		print(context)
-
-	with open(getDir("src/chapters/" + chapter + ".txt"), "w", encoding="utf-8") as fout:
-		fout.write(output)
-		print("Translation saved to ../src/chapters/" + chapter + ".txt")
-	buildIndex()
 
 def translateGemini(chapter: str, apiKey: str):
 	"""
 	Uses Gemini to translate a given chapter
 	"""
 	jpText = getChapterText(chapter)
-	sysPrompt = Path(getDir("build/systemPrompt.txt")).read_text(encoding="utf-8")
+	nouns = getRelevantNouns(jpText)
+	prompt = Path(getDir("build/systemPrompt.txt")).read_text(encoding="utf-8")
+	prompt = prompt.format(nouns=nouns, text=jpText)
+	print(prompt)
 
 	with open(getDir("src/chapters/" + chapter + ".txt"), "w", encoding="utf-8") as fout:
-		fout.write(promptGemini(apiKey, sysPrompt, jpText))
+		fout.write(promptGemini(apiKey, prompt))
 		print("Translation saved to ../src/chapters/" + chapter + ".txt")
 	buildIndex()
 
@@ -293,7 +228,6 @@ def printUsage():
 	"""
 	print("\nUsage: " + sys.argv[0] + " [command]\n")
 	print("\tchapter [number] [api key] (Translates the given chapter using Gemini)")
-	print("\tlocal [number] [max tokens] (Translates the given chapter using a local model)")
 	print("\tindex (Rebuilds the index)")
 	print("\tlatest (Prints the latest chapter id)")
 
@@ -314,16 +248,6 @@ if sys.argv[1] == "models":
 		sys.exit()
 	apiKey = sys.argv[2]
 	printGeminiModels(apiKey)
-
-if sys.argv[1] == "local":
-	if len(sys.argv) < 3:
-		printUsage()
-		sys.exit()
-	if len(sys.argv) > 3:
-		tokens = int(sys.argv[3])
-	else:
-		tokens = 4096
-	translateLocal(sys.argv[2], tokens)
 
 if sys.argv[1] == "index":
 	buildIndex()
