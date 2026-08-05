@@ -30,12 +30,13 @@ jobs:
       - name: Activate virtual environment
         run: |
           python -m venv .venv
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
           source .venv/bin/activate
           pip install --upgrade pip
           pip install -r ./build/requirements.txt
         
       - name: Run translate script
-        run: python ./build/translate.py chapter "${{ inputs.chapter }}" "${{ inputs.gemini_api_key }}"
+        run: python ./build/translate.py chapter ${{ inputs.chapter }} ${{ inputs.gemini_api_key }}
         
       - name: Commit and push changes
         run: |
