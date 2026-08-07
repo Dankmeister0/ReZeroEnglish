@@ -34,8 +34,8 @@ For proper nouns, titles, or terms NOT given (e.g. a name or term not yet catalo
 
 ## Title format
 The chapter title must be in a format such as the following, matching whichever the source indicates:
-- Arc X Part Y: "Title"
-- Arc X Interlude: "Title"
+- Arc # Chapter #: "Title"
+- Arc # Interlude: "Title"
 - Re:Zero EX: "Title"
 
 ## Output format
