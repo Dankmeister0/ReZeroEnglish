@@ -1,8 +1,10 @@
 import sys
 import requests
+import anyio
 import re
 from pathlib import Path
 from google import genai
+from claude_agent_sdk import query, ClaudeAgentOptions, ResultMessage
 
 def getDir(relPath: str) -> str:
 	"""
@@ -242,6 +244,34 @@ def printGeminiModels(apiKey: str) -> None:
 				if action == "generateContent":
 					print(m.name)
 
+def promptClaude(prompt: str) -> str:
+	async def _run() -> str:
+		result: str = ""
+		options = ClaudeAgentOptions(model="claude-sonnet-5")
+		async for message in query(prompt=prompt, options=options):
+			if isinstance(message, ResultMessage):
+				result = message.result
+		return result
+	return anyio.run(_run)
+
+def translateClaude(chapter: str):
+	if int(chapter) < 1:
+			chapter = getNextChapter()
+
+	jpText = getChapterText(chapter)
+	nouns = getRelevantNouns(jpText)
+	prompt = Path(getDir("build/systemPrompt.txt")).read_text(encoding="utf-8")
+	prompt = prompt.format(nouns=nouns, text=jpText)
+	print("Translating chapter " + chapter)
+	print("Glossary:")
+	print(nouns)
+
+	resp = promptClaude(prompt)
+	with open(getDir("src/chapters/" + chapter + ".txt"), "w", encoding="utf-8") as fout:
+		fout.write(resp)
+		print("Translation saved to ../src/chapters/" + chapter + ".txt")
+	buildIndex()
+
 def promptGemini(apiKey: str, prompt: str) -> str:
 	"""
 	Prompts Gemini using the given API key
@@ -266,7 +296,9 @@ def translateGemini(chapter: str, apiKey: str, backupApi: str):
 	nouns = getRelevantNouns(jpText)
 	prompt = Path(getDir("build/systemPrompt.txt")).read_text(encoding="utf-8")
 	prompt = prompt.format(nouns=nouns, text=jpText)
-	print(prompt)
+	print("Translating chapter " + chapter)
+	print("Glossary:")
+	print(nouns)
 
 	resp = promptGemini(apiKey, prompt)
 	if resp == "":
@@ -310,6 +342,12 @@ if sys.argv[1] == "chapter":
 
 	translateGemini(sys.argv[2], apiKey, backupApi)
 
+if sys.argv[1] == "claude":
+	if len(sys.argv) < 3:
+		printUsage()
+		sys.exit()
+	translateClaude(sys.argv[2])
+
 if sys.argv[1] == "loop":
 	if len(sys.argv) < 4:
 		printUsage()
@@ -322,6 +360,14 @@ if sys.argv[1] == "loop":
 
 	for i in range(int(sys.argv[2])):
 		translateGemini("-1", apiKey, backupApi)
+
+if sys.argv[1] == "claudeloop":
+	if len(sys.argv) < 3:
+		printUsage()
+		sys.exit()
+
+	for i in range(int(sys.argv[2])):
+		translateClaude("-1")
 
 if sys.argv[1] == "models":
 	if len(sys.argv) < 3:
