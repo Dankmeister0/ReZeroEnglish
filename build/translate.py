@@ -4,7 +4,7 @@ import anyio
 import re
 from pathlib import Path
 from google import genai
-from claude_agent_sdk import query, ClaudeAgentOptions, ResultMessage
+from claude_agent_sdk import query, ClaudeAgentOptions, AssistantMessage, ResultMessage, TextBlock
 
 def getDir(relPath: str) -> str:
 	"""
@@ -246,12 +246,20 @@ def printGeminiModels(apiKey: str) -> None:
 
 def promptClaude(prompt: str) -> str:
 	async def _run() -> str:
-		result: str = ""
+		chunks: list[str] = []
+		final_result: str = ""
 		options = ClaudeAgentOptions(model="claude-sonnet-5")
 		async for message in query(prompt=prompt, options=options):
-			if isinstance(message, ResultMessage):
-				result = message.result
-		return result
+			if isinstance(message, AssistantMessage):
+				for block in message.content:
+					if isinstance(block, TextBlock):
+						chunks.append(block.text)
+			elif isinstance(message, ResultMessage):
+				usage = message.usage or {}
+				print("Tokens Used: " + str(usage.get("input_tokens", 0) + usage.get("output_tokens", 0)) + " ($" + str(message.total_cost_usd) + ")")
+				final_result = message.result or ""
+		accumulated = "".join(chunks)
+		return accumulated if accumulated else final_result
 	return anyio.run(_run)
 
 def translateClaude(chapter: str):
