@@ -1,3 +1,4 @@
+竜	(Lesser) Dragon
 アビエイト	Abiate
 奈落	Abyss
 アドガルド	Adgard
@@ -80,6 +81,7 @@
 人除けの祝福	Blessing of People Repulsion
 邪龍	Blight Dragon
 悲恋歌人	Blighted Love Balladeer
+血斧	Blood Hatchet
 血涙鬼	Blood-Weeping Oni
 猪人	Boar Humans
 ボッコの実	Bokko Fruit
@@ -87,6 +89,7 @@
 叡智の書	Book of Wisdom
 死者の書	Book of the Dead
 ボルドー	Bordeaux Zergev
+腸狩り	Bowel Hunter
 勇牛	Brave Oxen
 バドハイム密林	Buddheim Jungle
 ブンガム	Bungam Eastern
@@ -127,6 +130,7 @@
 契約	Contract
 コンウッド	Conwood Melahau
 コルニアス	Corneas
+屍兵	Corpse Soldier
 記憶の回廊	Corridor of Memories
 コスツール	Costuul
 十人会	Council of Ten
@@ -145,6 +149,8 @@
 結晶灯	Crystal Lamp
 水晶宮	Crystal Palace
 呪い	Curse
+呪術	Curse Arts
+呪術師	Curse Arts User
 呪具	Curse Tools
 呪い師	Curse User
 単眼族	Cyclops Tribe
@@ -170,6 +176,94 @@
 神龍教会	Divine Dragon Church
 神龍儀	Divine Dragon Ritual
 加護	Divine Protection
+適応の加護	Divine Protection of Adaptability
+空駆けの加護	Divine Protection of Air Dashing
+騙し討ちの加護	Divine Protection of Ambushing
+退魔の加護	Divine Protection of Anti-Malignance
+算術の加護	Divine Protection of Arithmetic
+矢避けの加護	Divine Protection of Arrow Avoidance
+矢当ての加護	Divine Protection of Arrow-Hitting
+玉乗りの加護	Divine Protection of Ball Balancing
+寝技の加護	Divine Protection of Bedroom Wiles
+蒼天の加護	Divine Protection of Blue Skies
+煮物の加護	Divine Protection of Boiled Food
+雲の加護	Divine Protection of Clouds
+強制の加護	Divine Protection of Coercion
+闇払いの加護	Divine Protection of Darkness Nullification
+魔操の加護	Divine Protection of Demon Manipulation
+解毒の加護	Divine Protection of Detoxification
+隙間風の加護	Divine Protection of Drafts
+堅固の加護	Divine Protection of Durability
+地属性の加護	Divine Protection of Earth Attributes
+目利きの加護	Divine Protection of Evaluation
+遠見の加護	Divine Protection of Far-Sight
+服飾の加護	Divine Protection of Fashion
+火避けの加護	Divine Protection of Fire Avoidance
+火遊びの加護	Divine Protection of Fireplay
+初見の加護	Divine Protection of First Sight
+霧の加護	Divine Protection of Fog
+揚げ物の加護	Divine Protection of Fried Food
+園芸の加護	Divine Protection of Gardening
+誘精の加護	Divine Protection of Gathering Spirits
+理髪の加護	Divine Protection of Hairdressing
+仕様の加護	Divine Protection of Handling
+不屈の加護	Divine Protection of Idomitability
+先制の加護	Divine Protection of Initiative
+教育の加護	Divine Protection of Instruction
+孤独の加護	Divine Protection of Isolation
+審判の加護	Divine Protection of Judgement
+湖の加護	Divine Protection of Lakes
+洗濯の加護	Divine Protection of Laundry
+光解きの加護	Divine Protection of Light Disentanglement
+化粧の加護	Divine Protection of Makeup
+変心の加護	Divine Protection of Mind-Changing
+念話の加護	Divine Protection of Mindspeak
+高揚の加護	Divine Protection of Morale
+泥抜けの加護	Divine Protection of Mud Slippage
+新天の加護	Divine Protection of New Skies
+夜天の加護	Divine Protection of Night Skies
+悪夢の加護	Divine Protection of Nightmares
+百薬の加護	Divine Protection of Panacea
+転写の加護	Divine Protection of Photo-Realism
+追憶の加護	Divine Protection of Reminiscence
+反復の加護	Divine Protection of Repetition
+騎獣の加護	Divine Protection of Riding Animals
+騎乗の加護	Divine Protection of Riding Vehicles
+焼き物の加護	Divine Protection of Roasted Food
+塩の理の加護	Divine Protection of Salt Reasoning
+砂遊びの加護	Divine Protection of Sandplay
+再臨の加護	Divine Protection of Second Coming
+流血の加護	Divine Protection of Shedding Blood
+蒸し物の加護	Divine Protection of Steamed Food
+荒天の加護	Divine Protection of Stormy Skies
+日焼けの加護	Divine Protection of Sunburn
+早駆けの加護	Divine Protection of Swift Running
+剣聖の加護	Divine Protection of Sword Saint
+涙天の加護	Divine Protection of Teary Skies
+伝心の加護	Divine Protection of Telepathy
+鍛錬の加護	Divine Protection of Training
+三分の加護	Divine Protection of Trisection
+無手の加護	Divine Protection of Unarmed Combat
+簒奪の加護	Divine Protection of Usurpation
+植生の加護	Divine Protection of Vegetation
+水の加護	Divine Protection of Water
+水避けの加護	Divine Protection of Water Avoidance
+水捌けの加護	Divine Protection of Water Drainage
+水遊びの加護	Divine Protection of Waterplay
+風受けの加護	Divine Protection of Wind Absorption
+風除けの加護	Divine Protection of Wind Evasion
+風見の加護	Divine Protection of Wind Reading
+雲隠れの加護	Divine Protection of the Concealing Cloud
+死神の加護	Divine Protection of the Death God
+地霊の加護	Divine Protection of the Earth Spirits
+味王の加護	Divine Protection of the Flavor King
+雷雲の加護	Divine Protection of the Lightning Cloud
+不死鳥の加護	Divine Protection of the Phoenix
+言霊の加護	Divine Protection of the Soul of Language
+日輪の加護	Divine Protection of the Sun
+太陽の加護	Divine Protection of the Sun
+虎穴の加護	Divine Protection of the Tiger's Den
+武神の加護	Divine Protection of the Weapon God
 犬人	Dog Humans
 ドルテロ	Doltero Amule
 ドナヒュー	Donahue
@@ -177,6 +271,7 @@
 ドロテア	Dorothea Featherrun
 ドラクロイ	Dracroy
 沈む夕日に裏切られたドラフィン	Draffin Betrayed by the Sunset
+龍	Dragon
 竜車	Dragon Carriage
 竜歴石	Dragon History Stone
 竜珠	Dragon Jewel
@@ -187,7 +282,6 @@
 龍の血	Dragon's Blood
 竜殻	Dragonhusk
 竜人	Dragonkin
-龍	Dragons
 夢法	Dream Arts
 夢幻術師	Dream Arts User
 ディリステイ	Drisstay
@@ -278,6 +372,7 @@
 フォルド	Ford Lugunica
 エルフの森	Forest of the Elves
 フォルトナ	Fortuna
+四つの災い	Four Disasters
 四大国	Four Great Nations
 大いなる四つの災い	Four Mass-Scale Disasters
 フーリエ	Fourier Lugunica
@@ -467,9 +562,11 @@
 キスダ厶	Kisdam
 子猫人	Kitten Humans
 クライン	Klein Juukulius
+騎士の中の騎士	Knight among Knights
 騎士団詰所	Knights’ Garrison
 蠱毒	Kodoku
 コリーナ	Korrina
+虎鉄	Kotetsu
 ジャリガニ	Krafish
 クラウクラウン草原	Kraukraun Grasslands
 クルフナ	Krufuna
@@ -539,6 +636,7 @@
 魔弄師	Magic Manus Magister
 発魔期	Magic Release Period
 魔石砲	Magic Stone Cannon
+魔法器	Magic Vessel
 魔瘴石	Magical Miasma Stones
 魔造具	Magicreation Tools
 マゴージ	Magoji
@@ -571,6 +669,7 @@
 メリンダ	Melinda
 メリオ	Melio
 メルティ	Melty Pristis
+商い通り	Merchant Street
 メレテー	Merette
 ミーティア	Meteors
 メトレイ	Metley
@@ -731,6 +830,7 @@
 レーゼ	Reize
 レム	Rem
 レメンディス	Remendis
+死に戻り	Return by Death
 レックス	Rex
 リボーン	Riboon
 リカード	Ricardo Welkin
@@ -830,6 +930,7 @@
 精霊術師	Spiritual Arts User
 星詠み	Stargazer
 星	Stars
+蒸かし芋	Steamed Potato
 鋼糸術	Steel Thread Technique
 鋼人	Steelfolk
 ストライド一派	Stride Faction
@@ -883,7 +984,6 @@
 怠惰の討伐	The Subjugation of Sloth
 白鯨討伐	The Subjugation of the White Whale
 第三の試練	The Third Trial
-嫉妬の魔女	The Witch of Envy
 テレシア	Theresia van Astrea
 トルタ	Tholter Weasily
 トンプソン	Thompson
@@ -900,6 +1000,7 @@
 トッド	Todd Fang
 トリド	Toledo Spiegel
 トメト	Tometo
+頓珍漢	Ton, Chin, and Kan
 トネリコ	Tonerico
 トルネル	Tornel
 トスカ	Toska Astrea
@@ -936,7 +1037,8 @@
 ヴォルカス	Volcas
 ヴォラキア	Vollachia
 ヴァールハイト	Wahrheit
-魔人	Warlocks
+憂鬱の魔人	Warlock of Melancholy
+魔人	Warlock
 警戒石	Warning Stone
 ウォーウォー	Warwar
 水竜	Water Dragon
@@ -957,13 +1059,23 @@
 魔女因子	Witch Factor
 魔女狩り	Witch Hunts
 魔女裁判	Witch Trials
+嫉妬の魔女	Witch of Envy
+暴食の魔女	Witch of Gluttony
+強欲の魔女	Witch of Greed
+色欲の魔女	Witch of Lust
+憂鬱の魔女	Witch of Melancholy
+傲慢の魔女	Witch of Pride
+怠惰の魔女	Witch of Sloth
+虚飾の魔女	Witch of Vainglory
+憤怒の魔女	Witch of Wrath
 魔女の残り香	Witch's Lingering Scent
 魔女の香り	Witch's Scent
 魔獣	Witchbeast
-魔女	Witches
-大罪魔女	Witches of Sin
+魔女	Witch
+大罪魔女	Witch of Sin
 ウォルフ	Wolf
 狼人	Wolf Humans
+ウルフィン族	Wolfin Tribe
 ヤエ	Yae Tenzen
 ヤクトル	Yaktol Suwen
 ヤッツ	Yatz
@@ -982,12 +1094,4 @@
 ズィクル	Zikr Osman
 ゾッダ虫	Zodda Bug
 ゾーイ	Zoey
-血斧	blood hatchet
-屍兵	corpse soldiers
-呪術	curse arts
-呪術師	curse arts users
-竜	dragons
-四つの災い	four disasters
-蒸かし芋	steamed potatoes
-ウルフィン族	wolfin tribe
-ゾンビ	zombies
+ゾンビ	Zombie
