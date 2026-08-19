@@ -1,7 +1,6 @@
 import sys
 import requests
 import anyio
-import re
 from pathlib import Path
 from google import genai
 from claude_agent_sdk import query, ClaudeAgentOptions, AssistantMessage, ResultMessage, TextBlock
@@ -35,142 +34,49 @@ def buildIndex():
 	with open(getDir("src/chapters/index.txt"), "w", encoding="utf-8") as fout:
 		fout.write(output)
 
-def get_kanji_names(nounMap: dict[str, str], characters: list[str]) -> None:
-	url = "https://rezero.fandom.com/api.php"
-
-	# MediaWiki allows fetching multiple pages at once by separating them with a pipe "|"
-	# We loop through titles in chunks of 50 (the max limit for standard users)
-	chunk_size = 50
-	for i in range(0, len(characters), chunk_size):
-		chunk = characters[i:i + chunk_size]
-		titles_string = "|".join(chunk)
-		
-		params = {
-			"action": "query",
-			"prop": "revisions",
-			"titles": titles_string,
-			"rvprop": "content",
-			"rvslots": "main",
-			"format": "json"
-		}
-		
-		try:
-			response = requests.get(url, params=params)
-			response.raise_for_status()
-			data = response.json()
-			
-			pages = data.get("query", {}).get("pages", {})
-			
-			for _page_id, page_info in pages.items():
-				title: str = page_info.get("title")
-				
-				# Extract raw wikitext content
-				wikitext = page_info["revisions"][0]["slots"]["main"]["*"]
-				
-				# Use regex to search for the specific "ja_kanji" field in the infobox template
-				# Matches patterns like "| Kanji = ナツキ・スバル" or "|Kanji=サテラ"
-				match = re.search(r'\|\s*Kanji\s*=\s*([^|\}\(\n]+)', wikitext)
-
-				# Fallback to getting from alias
-				if match is None or match.group(1).strip() == "":
-					match = re.search(r'\|\s*Alias\s*=\s*[^(]+.([^,\)\n]+)', wikitext)
-				
-				if match:
-					# Strip away whitespace and any leftover template brackets
-					kanji_name = match.group(1).strip()
-					print(kanji_name + ": " + title)
-					nounMap[kanji_name] = title
-					continue
-
-		except requests.exceptions.RequestException as e:
-			print(f"Error fetching batch starting at index {i}: {e}")
-
-def buildNounMap():
+def buildGlossary():
 	"""
-	Rebuilds build/nouns.tsv
-	This file is a list of proper nouns used in Re:Zero in Japanese and English. This is used to improve the accuracy of spelling for names & related nouns.
+	Removes duplicates & sorts build/glossary.tsv
 	"""
-	headers = {
-		"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-	}
-	params = {
-		"action": "parse",
-		"page": "Terminology",
-		"format": "json"
-	}
-	resp = requests.get("https://rezero.fandom.com/api.php", headers=headers, params=params)
-	html: str = resp.json()["parse"]["text"]["*"]
-	nounMap: dict[str, str] = {}
+	glossary: dict[str, str] = loadGlossary()
+	glossary = dict(sorted(glossary.items(), key=lambda item: item[1]))
 
-	for match in re.finditer(r'<b>(<a.*?>)?([^<]+)(<\/a>)?<\/b>:?\s\(([^,\)\s]+)', html):
-		eng: str = match.group(2)
-		jp: str = match.group(4)
-		nounMap[jp] = eng
-
-	params = {
-		"action": "query",
-		"list": "categorymembers",
-		"cmtitle": "Category:Characters",
-		"cmlimit": "max",
-		"cmtype": "page",
-		"format": "json"
-	}
-	characters: list[str] = []
-
-	while True:
-		resp = requests.get("https://rezero.fandom.com/api.php", headers=headers, params=params)
-		resp.raise_for_status()
-		data = resp.json()
-		members = data["query"]["categorymembers"]
-
-		for member in members:
-			characters.append(member["title"])
-
-		if "continue" in resp.json():
-			params["cmcontinue"] = data["continue"]["cmcontinue"]
-		else:
-			break
-
-	get_kanji_names(nounMap, characters)
-
-	with open(getDir("build/nouns.tsv"), "w", encoding="utf-8") as fout:
-		for jp, en in nounMap.items():
+	with open(getDir("build/glossary.tsv"), "w", encoding="utf-8") as fout:
+		for jp, en in glossary.items():
 			fout.write(jp + "\t" + en + "\n")
 
-def loadNounMap() -> dict[str, str]:
+def loadGlossary() -> dict[str, str]:
 	"""
-	Loads the nouns from build/nouns.tsv
+	Loads the glossary from build/glossary.tsv
 	The key is the Japanese noun & the value is the English translation
 	"""
-	nounMap: dict[str, str] = {}
-	with open(getDir("build/nouns.tsv"), "r", encoding="utf-8") as fin:
+	glossary: dict[str, str] = {}
+	with open(getDir("build/glossary.tsv"), "r", encoding="utf-8") as fin:
 		for line in fin:
-			line = line.rstrip('\n')
-			parts = line.split("\t")
-			if parts[0] == "" or parts[1] == "":
+			parts = line.strip().split("\t")
+			if len(parts) < 2 or parts[0] == "" or parts[1] == "":
 				continue
-			partsJp = parts[0].split("・")
-			partsEn = parts[1].split(" ")
-			if len(partsJp) == 1 or len(partsJp) != len(partsEn):
-				nounMap[parts[0]] = parts[1]
-				continue
+			if parts[0] in glossary:
+				print("[Error] Duplicate glossary entries found:")
+				print("\t" + parts[0] + " → " + parts[1])
+				print("\t" + parts[0] + " → " + glossary[parts[0]])
+			glossary[parts[0]] = parts[1]
+	return glossary
 
-			for i in range(0, len(partsJp)):
-				nounMap[partsJp[i]] = partsEn[i]
-	return nounMap
+def getGlossaryEntries(jpText: str) -> str:
+	"""
+	Compiles the relevant glossary entries for a given chapter
+	"""
+	glossary = loadGlossary()
+	relevantEntries: str = ""
 
-def getRelevantNouns(jpText: str) -> str:
-	nounMap = loadNounMap()
-	relevantNouns: str = ""
+	for jp, en in glossary.items():
+		if jpText.find(jp) > -1:
+			relevantEntries += "\t- " + jp + " → " + en + "\n"
 
-	for jpNoun, engNoun in nounMap.items():
-		if jpText.find(jpNoun) > -1:
-			relevantNouns += "\t- " + jpNoun + " → " + engNoun + "\n"
-
-	if relevantNouns == "":
-		relevantNouns = "<NULL>\n"
-	return relevantNouns
-
+	if relevantEntries == "":
+		relevantEntries = "<NULL>\n"
+	return relevantEntries
 
 def getNewestChapter() -> str:
 	"""
@@ -191,25 +97,6 @@ def getNewestChapter() -> str:
 	idx = resp.text.find("&nbsp;", idx) + 6
 	chapter = resp.text[idx:resp.text.find("&nbsp;", idx)]
 	return chapter
-
-def getNextChapter() -> str:
-	chapter: str = getNewestChapter()
-	if chapter == "":
-		return ""
-
-	filenames: set[str] = set()
-	folderPath = Path(getDir("src/chapters"))
-	for file in folderPath.rglob("*.txt"):
-		if file.stem == "index":
-			continue
-		filenames.add(file.stem)
-
-	while True:
-		if int(chapter) < 1:
-			return ""
-		if chapter not in filenames:
-			return chapter
-		chapter = str(int(chapter) - 1)
 
 
 def getChapterText(chapter: str) -> str:
@@ -245,6 +132,9 @@ def printGeminiModels(apiKey: str) -> None:
 					print(m.name)
 
 def promptClaude(prompt: str) -> str:
+	"""
+	Prompts Claude using the Claude Code installation
+	"""
 	async def _run() -> str:
 		chunks: list[str] = []
 		final_result: str = ""
@@ -262,134 +152,97 @@ def promptClaude(prompt: str) -> str:
 		return accumulated if accumulated else final_result
 	return anyio.run(_run)
 
-def translateClaude(chapter: str):
-	if int(chapter) < 1:
-			chapter = getNextChapter()
-
-	jpText = getChapterText(chapter)
-	nouns = getRelevantNouns(jpText)
-	prompt = Path(getDir("build/systemPrompt.txt")).read_text(encoding="utf-8")
-	prompt = prompt.format(nouns=nouns, text=jpText)
-	print("Translating chapter " + chapter)
-	print("Glossary:")
-	print(nouns)
-
-	resp = promptClaude(prompt)
-	with open(getDir("src/chapters/" + chapter + ".txt"), "w", encoding="utf-8") as fout:
-		fout.write(resp)
-		print("Translation saved to ../src/chapters/" + chapter + ".txt")
-	buildIndex()
-
-def promptGemini(apiKey: str, prompt: str) -> str:
+def promptGemini(prompt: str, apiKey: str) -> str:
 	"""
 	Prompts Gemini using the given API key
 	"""
 	geminiClient = genai.Client(api_key=apiKey)
-	try:
-		resp = geminiClient.models.generate_content(model="gemini-3.6-flash", contents=prompt) #type: ignore
-	except:
-		geminiClient.close()
-		return ""
-
+	resp = geminiClient.models.generate_content(model="gemini-3.6-flash", contents=prompt) #type: ignore
 	return resp.text if resp.text is not None else ""
 
-def translateGemini(chapter: str, apiKey: str, backupApi: str):
+def translateChapter(model: str, chapter: str, apiKey: str):
 	"""
-	Uses Gemini to translate a given chapter
+	Translates a single chapter
 	"""
-	if int(chapter) < 1:
-		chapter = getNextChapter()
-
 	jpText = getChapterText(chapter)
-	nouns = getRelevantNouns(jpText)
+	glossary = getGlossaryEntries(jpText)
 	prompt = Path(getDir("build/systemPrompt.txt")).read_text(encoding="utf-8")
-	prompt = prompt.format(nouns=nouns, text=jpText)
-	print("Translating chapter " + chapter)
-	print("Glossary:")
-	print(nouns)
+	prompt = prompt.format(glossary=glossary, text=jpText)
 
-	resp = promptGemini(apiKey, prompt)
-	if resp == "":
-		print("Using backup API key")
-		resp = promptGemini(backupApi, prompt)
-
-	if resp == "":
+	if model == "claude":
+		resp = promptClaude(prompt)
+	elif model == "gemini":
+		resp = promptGemini(prompt, apiKey)
+	else:
+		print("Unknown model: " + model)
 		return
-
 
 	with open(getDir("src/chapters/" + chapter + ".txt"), "w", encoding="utf-8") as fout:
 		fout.write(resp)
-		print("Translation saved to ../src/chapters/" + chapter + ".txt")
 	buildIndex()
+
+def translateChapters(model: str, beginChapter: str, endChapter: str, apiKey: str):
+	"""
+	Translates a range of chapters. Can use "gemini" or "claude" as models
+	"""
+	chapter1 = int(beginChapter)
+	chapter2 = int(endChapter) if endChapter != "" else chapter1
+	maxChapter = int(getNewestChapter())
+	chapter1 = maxChapter + chapter1 + 1 if chapter1 < 0 else 1 if chapter1 == 0 else maxChapter if chapter1 > maxChapter else chapter1
+	chapter2 = maxChapter + chapter2 + 1 if chapter2 < 0 else 1 if chapter2 == 0 else maxChapter if chapter2 > maxChapter else chapter2
+	if chapter2 < chapter1:
+		tmpChp = chapter1
+		chapter1 = chapter2
+		chapter2 = tmpChp
+
+	for i in range(chapter1, chapter2 + 1, 1):
+		if Path(getDir("src/chapters/" + str(i) + ".txt")).is_file():
+			print("Chapter " + str(i) + " is already translated. Skipping.")
+			continue
+
+		print("Translating chapter " + str(i))
+		translateChapter(model, str(i), apiKey)
+		print("Translation saved to ../src/chapters/" + str(i) + ".txt")
 
 def printUsage():
 	"""
 	Prints the usage of this script
 	"""
 	print("\nUsage: " + sys.argv[0] + " [command]\n")
-	print("\tchapter [number] [api key] [backup api] (Translates the given chapter using Gemini)")
-	print("\tloop [number] [api key] [backup api] (Loops the given number of chapters, going from newest to oldest)")
-	print("\tlatest (Prints the latest chapter id)")
+	print("\tclaude <start chapter> [end chapter]")
+	print("\tgemini <api key> <start chapter> [end chapter]")
 	print("\tindex (Rebuilds the index)")
-	print("\tnouns (Rebuilds the noun list)")
-	print("\tmodels [api key] (Prints available Gemini models)")
+	print("\tglossary (Rebuilds the glossary)")
+	print("\tmodels <api key> (Prints available Gemini models)")
 
 if len(sys.argv) < 2:
 	printUsage()
 	sys.exit()
 
-if sys.argv[1] == "chapter":
-	if len(sys.argv) < 4:
-		printUsage()
-		sys.exit()
-	apiKey = sys.argv[3]
-	backupApi = ""
-
-	if len(sys.argv) > 3:
-		backupApi = sys.argv[3]
-
-	translateGemini(sys.argv[2], apiKey, backupApi)
-
 if sys.argv[1] == "claude":
 	if len(sys.argv) < 3:
 		printUsage()
 		sys.exit()
-	translateClaude(sys.argv[2])
+	translateChapters("claude", sys.argv[2], sys.argv[3] if len(sys.argv) > 3 else "", "")
 
-if sys.argv[1] == "loop":
+if sys.argv[1] == "gemini":
 	if len(sys.argv) < 4:
 		printUsage()
 		sys.exit()
-	apiKey = sys.argv[3]
-	backupApi = ""
+	translateChapters("gemini", sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "", sys.argv[2])
 
-	if len(sys.argv) > 3:
-		backupApi = sys.argv[3]
+if sys.argv[1] == "index":
+	buildIndex()
 
-	for i in range(int(sys.argv[2])):
-		translateGemini("-1", apiKey, backupApi)
-
-if sys.argv[1] == "claudeloop":
-	if len(sys.argv) < 3:
-		printUsage()
-		sys.exit()
-
-	for i in range(int(sys.argv[2])):
-		translateClaude("-1")
+if sys.argv[1] == "glossary":
+	buildGlossary()
 
 if sys.argv[1] == "models":
 	if len(sys.argv) < 3:
 		printUsage()
 		sys.exit()
 	apiKey = sys.argv[2]
-	
 	printGeminiModels(apiKey)
-
-if sys.argv[1] == "index":
-	buildIndex()
 
 if sys.argv[1] == "latest":
 	print(getNewestChapter())
-
-if sys.argv[1] == "nouns":
-	buildNounMap()

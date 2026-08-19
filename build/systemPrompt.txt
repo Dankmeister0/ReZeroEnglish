@@ -50,7 +50,7 @@ Do not include any other commentary, meta-discussion, or restatement of these in
 ---
 
 The following terms may be relevant to this chapter, with their proper romanization/translation per the Re:Zero wiki:
-{nouns}
+{glossary}
 
 Translate the following Japanese text into English:
 
