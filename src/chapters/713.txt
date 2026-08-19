@@ -147,7 +147,7 @@ Reinhard was certainly Felt's knight, but Felt had no intention of deluding hers
 So even with delicious food to eat, far better clothes to wear, and the ability to sleep soundly and safely through the night, she hadn't the slightest intention of letting her own original "cards" go to waste.
 
 Felt's "cards," put simply, were the many abilities she had cultivated in order to "live strong."
-The eye for spotting easy marks and the fleet feet honed in her slum days, the nerve to never flinch at any situation, and the instinct for when things had gone dangerously wrong — all of these, after the incident with the "Gut Hunter" that had led to her meeting Reinhard, she'd realized needed sharpening further to still be of use, and she'd kept honing them even amid the advanced education she underwent for the Royal Selection.
+The eye for spotting easy marks and the fleet feet honed in her slum days, the nerve to never flinch at any situation, and the instinct for when things had gone dangerously wrong — all of these, after the incident with the "Bowel Hunter" that had led to her meeting Reinhard, she'd realized needed sharpening further to still be of use, and she'd kept honing them even amid the advanced education she underwent for the Royal Selection.
 
 In fact, every one of her "cards" had become far more useful than before. —Though even so, she'd yet to manage shaking Reinhard off even once.
 
@@ -497,7 +497,7 @@ This was, in a form entirely different from the decisive battle against the Swor
 —And so began the unavoidable battle between Aldebaran and an enemy that would come at him with sheer numbers.
 
 <notes>
-- "腸狩り" rendered as "Gut Hunter" — not a catalogued wiki term; flagging for verification.
+- "腸狩り" rendered as "Bowel Hunter," matching the established rendering used elsewhere (e.g. ch22–24, 427, 434, 556) and now catalogued in the glossary.
 - "『灰色』" rendered as "the Gray One" — likely refers to a gray-haired figure (possibly Wilhelm van Astrea) tied to the Priestella incident, but the text doesn't name him explicitly; flagging the referent as uncertain.
 - The Balance's speech (katakana sentence-ending particles ナ/ヨ/イ/サ suggesting a foreign/odd cadence) was adapted into English with tag-word endings ("hm?"/"yo"/"no"/"yes") to preserve the speech quirk rather than a direct equivalent — a substitution, not a literal rendering.
 - Title "百倍厄介" rendered as "A Hundredfold Nuisance"; "厄介" could also fit "Trouble/Bother/Headache" — flagging alternate phrasing for consideration.

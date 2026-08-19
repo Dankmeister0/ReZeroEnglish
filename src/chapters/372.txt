@@ -961,6 +961,5 @@ While it's pretty hopeless whether a continuation will ever be drawn, thank you 
 I'll do my best again next year or something.
 
 <notes>
-- The term list provided in the prompt listed "エキドナ → Eridna", but this appears to be a typo in the table. The official and universally recognized Hepburn/wiki romanization for エキドナ in Re:Zero is "Echidna". "Echidna" was used throughout the translation accordingly.
 - Daphne's dialogue includes her unique nicknames for other characters (メトメト → Met-Met, ラムラム → Ram-Ram, ガフガフ → Gaf-Gaf, すばるん → Subarun, ミーミ → Mimi-n). These were preserved/adapted to reflect her speech quirk.
 </notes>
