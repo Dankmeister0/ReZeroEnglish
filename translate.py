@@ -137,7 +137,7 @@ def promptGemini(prompt: str, apiKey: str) -> str:
 	Prompts Gemini using the given API key
 	"""
 	geminiClient = genai.Client(api_key=apiKey)
-	resp = geminiClient.models.generate_content(model="gemini-3.6-flash", contents=prompt) #type: ignore
+	resp = geminiClient.models.generate_content(model="gemini-3.8-flash", contents=prompt) #type: ignore
 	return resp.text if resp.text is not None else ""
 
 def translateChapter(model: str, chapter: str, apiKey: str):

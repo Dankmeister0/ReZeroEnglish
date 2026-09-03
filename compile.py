@@ -1,5 +1,6 @@
 from pathlib import Path
 import markdown
+import sys
 
 class Chapter:
 	id: str
@@ -10,8 +11,10 @@ class Chapter:
 
 def getArc(id: str) -> str:
 	ID = float(id)
-	if ID < 25:
+	if ID <= 24:
 		return "1"
+	elif ID < 25:
+		return "side1"
 	elif ID < 75:
 		return "2"
 	elif ID < 77:
@@ -52,21 +55,7 @@ def getTitle(chapter: Chapter, line: str) -> str:
 		title = line[4 + len(chapter.arc):-1]
 	return title.replace("\"", "", 1)
 
-def makeChapterPage(prev: Chapter | None, chapter: Chapter, next: Chapter | None, template: str) -> None:
-	prevID = "" if prev is None else prev.id
-	nextID = "" if next is None else next.id
-	fullText = Path("chapters/" + chapter.id + ".txt").read_text(encoding="utf-8")
-	splitText = fullText.split("\n", 1)
-	title = splitText[0]
-	text = splitText[1]
-	text = text.replace("<notes>", "***").replace("</notes>", "***")
-	text = markdown.markdown(text)
-
-	with open("pages/" + chapter.id + ".html", "w", encoding="utf-8") as fout:
-		fout.write(template.format(prev=prevID, next=nextID, title=title, text=text))
-
-def main():
-	# Build list of chapters
+def getChapters() -> list[Chapter]:
 	chapters: list[Chapter] = []
 	for file in Path("chapters").rglob("*.txt"):
 		if file.stem == "index" or file.stem == "temp":
@@ -84,8 +73,22 @@ def main():
 		chapters.append(chapter)
 
 	chapters.sort(key=lambda c: float(c.id))
+	return chapters
 
-	# Build table of contents
+def makeChapterPage(prev: Chapter | None, chapter: Chapter, next: Chapter | None, template: str) -> None:
+	prevID = "" if prev is None else prev.id
+	nextID = "" if next is None else next.id
+	fullText = Path("chapters/" + chapter.id + ".txt").read_text(encoding="utf-8")
+	splitText = fullText.split("\n", 1)
+	title = splitText[0]
+	text = splitText[1]
+	text = text.replace("<notes>", "***").replace("</notes>", "***")
+	text = markdown.markdown(text)
+
+	with open("pages/" + chapter.id + ".html", "w", encoding="utf-8") as fout:
+		fout.write(template.format(prev=prevID, next=nextID, title=title, text=text))
+
+def makeTOC(chapters: list[Chapter]) -> None:
 	html = Path("resources/templateTOC.html").read_text(encoding="utf-8")
 	arcHtmls: dict[str, str] = {}
 	for chapter in chapters:
@@ -96,9 +99,16 @@ def main():
 	with open("index.html", "w", encoding="utf-8") as fout:
 		fout.write(html)
 
-	# Build chapter pages
+def makeChapters(chapters: list[Chapter]) -> None:
 	html = Path("resources/templateChapter.html").read_text(encoding="utf-8")
 	for i in range(0, len(chapters)):
 		makeChapterPage(chapters[i - 1], chapters[i], None if i == len(chapters) - 1 else chapters[i + 1], html)
 
-main()
+if len(sys.argv) < 2 or sys.argv[1] == "all":
+	chapters = getChapters()
+	makeTOC(chapters)
+	makeChapters(chapters)
+
+elif sys.argv[1] == "toc":
+	chapters = getChapters()
+	makeTOC(chapters)
