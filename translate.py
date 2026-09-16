@@ -118,7 +118,7 @@ def promptClaude(prompt: str) -> str:
 	async def _run() -> str:
 		chunks: list[str] = []
 		final_result: str = ""
-		options = ClaudeAgentOptions(model="claude-sonnet-5")
+		options = ClaudeAgentOptions(model="claude-opus-5")
 		async for message in query(prompt=prompt, options=options):
 			if isinstance(message, AssistantMessage):
 				for block in message.content:
@@ -140,25 +140,40 @@ def promptGemini(prompt: str, apiKey: str) -> str:
 	resp = geminiClient.models.generate_content(model="gemini-3.8-flash", contents=prompt) #type: ignore
 	return resp.text if resp.text is not None else ""
 
-def translateChapter(model: str, chapter: str, apiKey: str):
+def translateText(model: str, jpText: str, apiKey: str) -> str:
 	"""
-	Translates a single chapter
+	Translates raw Japanese text using the given model
 	"""
-	jpText = getChapterText(chapter)
 	glossary = getGlossaryEntries(jpText)
 	prompt = Path("resources/prompt.txt").read_text(encoding="utf-8")
 	prompt = prompt.format(glossary=glossary, text=jpText)
 
 	if model == "claude":
-		resp = promptClaude(prompt)
+		return promptClaude(prompt)
 	elif model == "gemini":
-		resp = promptGemini(prompt, apiKey)
+		return promptGemini(prompt, apiKey)
 	else:
 		print("Unknown model: " + model)
-		return
+		return ""
+
+def translateChapter(model: str, chapter: str, apiKey: str):
+	"""
+	Translates a single chapter
+	"""
+	jpText = getChapterText(chapter)
+	resp = translateText(model, jpText, apiKey)
 
 	with writeChapterFile(chapter) as fout:
 		fout.write(resp)
+
+def translateFile(model: str, inputPath: str, outputPath: str, apiKey: str):
+	"""
+	Translates the raw Japanese text of a local file and writes the result to another local file
+	"""
+	jpText = Path(inputPath).read_text(encoding="utf-8")
+	resp = translateText(model, jpText, apiKey)
+
+	Path(outputPath).write_text(resp, encoding="utf-8")
 
 def translateChapters(model: str, beginChapter: str, endChapter: str, apiKey: str):
 	"""
@@ -196,6 +211,8 @@ def printUsage():
 	print("\nUsage: " + sys.argv[0] + " [command]\n")
 	print("\tclaude <start chapter> [end chapter]")
 	print("\tgemini <api key> <start chapter> [end chapter]")
+	print("\tfile claude <input path> <output path>")
+	print("\tfile gemini <api key> <input path> <output path>")
 	print("\tglossary (Rebuilds the glossary)")
 	print("\tmodels <api key> (Prints available Gemini models)")
 
@@ -215,6 +232,25 @@ if sys.argv[1] == "gemini":
 		sys.exit()
 	translateChapters("gemini", sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else "", sys.argv[2])
 
+
+if sys.argv[1] == "file":
+	if len(sys.argv) < 3:
+		printUsage()
+		sys.exit()
+
+	if sys.argv[2] == "claude":
+		if len(sys.argv) < 5:
+			printUsage()
+			sys.exit()
+		translateFile("claude", sys.argv[3], sys.argv[4], "")
+	elif sys.argv[2] == "gemini":
+		if len(sys.argv) < 6:
+			printUsage()
+			sys.exit()
+		translateFile("gemini", sys.argv[4], sys.argv[5], sys.argv[3])
+	else:
+		printUsage()
+		sys.exit()
 
 if sys.argv[1] == "glossary":
 	buildGlossary()

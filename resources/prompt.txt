@@ -36,7 +36,7 @@ The chapter title must be in one of the following formats, matching whichever th
 - Arc # Prelude/Interlude/etc: "Title"
 - Re:Zero EX: "Title"
 - Side Story: "Title"
-Translate '第#' as 'Arc #' and '章' as 'Chapter'.
+Translate '第X章Y' as 'Arc X Chapter Y'.
 The translated chapter title must be the first line of the output. Do not use any extra markdown for the title.
 
 ## Output format

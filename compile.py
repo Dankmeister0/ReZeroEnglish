@@ -4,55 +4,80 @@ import sys
 
 class Chapter:
 	id: str
-	arc: str
+	section: str
 	title: str
-	side: bool
-	ex: bool
 
-def getArc(id: str) -> str:
-	ID = float(id)
-	if ID <= 24:
-		return "1"
-	elif ID < 25:
-		return "side1"
-	elif ID < 75:
-		return "2"
-	elif ID < 77:
-		return "oneday1"
-	elif ID < 167:
-		return "3"
-	elif ID < 308:
-		return "4"
-	elif ID < 317:
-		return "oneday2"
-	elif ID < 403:
-		return "5"
-	elif ID < 498:
-		return "6"
-	elif ID < 617:
-		return "7"
-	elif ID < 695:
-		return "8"
-	elif ID < 758:
-		return "9"
-	else:
-		return "10"
+sections: list[str] = [ \
+	"Arc 1", "Arc 1 Side", "Arc 1 IF", \
+	"Arc 2", "One Day I", "Arc 2 Side", "Arc 2 IF", \
+	"Arc 3", "Arc 3 Side", "Arc 3 IF", \
+	"Arc 4", "One Day II", "Arc 4 Side", "Arc 4 IF", \
+	"Arc 5", "Arc 5 Side", \
+	"Arc 6", "Scorpion Tale", "Arc 6 Side", "Arc 6 IF", \
+	"Arc 7", "Arc 7 Side", "Arc 7 IF", \
+	"Arc 8", "Iris and the King of Thorns", "Arc 8 Side", "Arc 8 IF", \
+	"Arc 9", "Arc 9 Side", "Arc 9 IF", \
+	"Arc 10", "Extra IF", "Unknown" \
+]
 
-def getTitle(chapter: Chapter, line: str) -> str:
-	title = ""
+def getSection(title: str, id: str) -> str:
+	if id == "434":
+		return "Arc 1 IF"
+	if id == "443":
+		return "Arc 2 IF"
+	if id == "269" or id == "269.1":
+		return "Arc 3 IF"
+	if id == "427":
+		return "Arc 4 IF"
+	if id == "473":
+		return "Arc 6 IF"
+	if id == "719":
+		return "Arc 7 IF"
+	if id == "676" or id == "677":
+		return "Iris and the King of Thorns"
+	if id == "771":
+		return "Arc 9 IF"
+	if id == "372" or id == "398" or id == "486" or id == "511" or id == "556" or id == "616":
+		return "Extra IF"
+
+	for section in reversed(sections):
+		if section == "Unkown" or section == "Iris and the King of Thorns":
+			continue
+		if title.find(section) != -1:
+			return section
+
+	print("Unknown section for chapter: " + title)
+	return "Unknown"
+
+def getSectionTitle(section: str) -> str:
+	if section == "Arc 1":
+		return "A Tumultuous First Day"
+	if section == "Arc 2":
+		return "The Chaotic Week"
+	if section == "Arc 3":
+		return "Return to the Royal Capital"
+	if section == "Arc 4":
+		return "Everlasting Contract"
+	if section == "Arc 5":
+		return "Stars What Make History"
+	if section == "Arc 6":
+		return "Hall of Memories"
+	if section == "Arc 7":
+		return "The Land of Wolves"
+	if section == "Arc 8":
+		return "Vincent Vollachia"
+	if section == "Arc 9":
+		return "Light of a Nameless Star"
+	if section == "Arc 10":
+		return "The Land of the Lion Kings"
+	return ""
+
+def getTitle(section: str, line: str) -> str:
 	line = line.strip()
-	if chapter.ex:
-		title = line[8:-1]
-	elif chapter.side:
-		title = line[:-1]
-	elif chapter.arc == "oneday1":
-		title = line[10:-1]
-	elif chapter.arc == "oneday2":
-		title = line[11:-1]
-	elif chapter.id == "1":
-		title = line[:-1]
+	if line.find("Re:Zero EX") != -1:
+		title = line[1 + len("Re:Zero EX"):-1]
 	else:
-		title = line[4 + len(chapter.arc):-1]
+		title = line[1 + len(section):-1]
 	return title.replace("\"", "", 1)
 
 def getChapters() -> list[Chapter]:
@@ -66,13 +91,11 @@ def getChapters() -> list[Chapter]:
 
 		chapter = Chapter()
 		chapter.id = file.stem
-		chapter.arc = getArc(file.stem)
-		chapter.side = titleStr.find("Side Story") != -1
-		chapter.ex = titleStr.find("EX") != -1
-		chapter.title = getTitle(chapter, titleStr)
+		chapter.section = getSection(titleStr, file.stem)
+		chapter.title = getTitle(chapter.section, titleStr)
 		chapters.append(chapter)
 
-	chapters.sort(key=lambda c: float(c.id))
+	chapters.sort(key=lambda c: sections.index(c.section) * 1000 + float(c.id))
 	return chapters
 
 def makeChapterPage(prev: Chapter | None, chapter: Chapter, next: Chapter | None, template: str) -> None:
@@ -83,21 +106,33 @@ def makeChapterPage(prev: Chapter | None, chapter: Chapter, next: Chapter | None
 	title = splitText[0]
 	text = splitText[1]
 	text = text.replace("<notes>", "***").replace("</notes>", "***")
-	text = markdown.markdown(text)
+	text = markdown.markdown(text, extensions=["nl2br"])
 
 	with open("pages/" + chapter.id + ".html", "w", encoding="utf-8") as fout:
-		fout.write(template.format(prev=prevID, next=nextID, title=title, text=text))
+		fout.write(template.format(prev=prevID, id=chapter.id, next=nextID, title=title, text=text))
 
 def makeTOC(chapters: list[Chapter]) -> None:
 	html = Path("resources/templateTOC.html").read_text(encoding="utf-8")
-	arcHtmls: dict[str, str] = {}
+	section: str = ""
+	innerHtml: str = ""
+
 	for chapter in chapters:
-		arcHtmls.setdefault(chapter.arc, "")
-		arcHtmls[chapter.arc] += "<a href=\"pages/" + chapter.id + ".html\" style=\"display: block;\">" + chapter.title + "</a>"
-	html = html.format(arc1=arcHtmls["1"], arc2=arcHtmls["2"], arc3=arcHtmls["3"], oneday1=arcHtmls["oneday1"], arc4=arcHtmls["4"], oneday2=arcHtmls["oneday2"], arc5=arcHtmls["5"], arc6=arcHtmls["6"], arc7=arcHtmls["7"], arc8=arcHtmls["8"], arc9=arcHtmls["9"], arc10=arcHtmls["10"])
+		if section != chapter.section:
+			if innerHtml != "":
+				innerHtml += "</div>"
+
+			section = chapter.section
+			sectionTitle = getSectionTitle(section)
+			if sectionTitle != "":
+				innerHtml += f'<h5 id="{section}">{section}: {sectionTitle}</h5><div style="margin-bottom: 18px;">'
+			else:
+				innerHtml += f'<h6 id="{section}">{section}</h6><div style="margin-bottom: 18px;">'
+
+		innerHtml += f'<a id="{chapter.id}" href="pages/{chapter.id}.html" style="display: block;">{chapter.title}</a>'
+	innerHtml += "</div>"
 
 	with open("index.html", "w", encoding="utf-8") as fout:
-		fout.write(html)
+		fout.write(html.format(data = innerHtml))
 
 def makeChapters(chapters: list[Chapter]) -> None:
 	html = Path("resources/templateChapter.html").read_text(encoding="utf-8")
