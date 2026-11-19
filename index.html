@@ -34,16 +34,6 @@
         </button>
       </div>
 
-      <section class="library-intro" aria-label="Library status">
-        <p class="eyebrow">TRANSLATED WEB NOVEL</p>
-        <p class="library-count"><strong>818</strong> chapters in your library</p>
-        <div class="library-reading-position">
-          <span id="libraryPosition">Start reading</span>
-          <span id="libraryPercentage">0%</span>
-        </div>
-        <div class="mini-progress" aria-hidden="true"><span id="libraryProgress"></span></div>
-      </section>
-
       <label class="chapter-search">
         <span class="sr-only">Find a chapter</span>
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m20 20-4.35-4.35m2.35-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z" /></svg>
@@ -51,6 +41,11 @@
       </label>
 
       <nav class="chapter-list" id="chapterList" aria-label="Chapters"></nav>
+
+      <div class="library-context-menu" id="libraryContextMenu" popover>
+        <button type="button" id="markLibraryRead">Mark as read</button>
+        <button type="button" id="markLibraryUnread">Mark as unread</button>
+      </div>
 
       <div class="library-footer">
         <span class="status-dot"></span>
@@ -79,14 +74,6 @@
       </header>
 
       <section class="reader-shell" aria-live="polite">
-        <div class="chapter-utilities">
-          <span class="chapter-index" id="chapterIndex">CHAPTER 1 OF 818</span>
-          <button class="save-button" id="saveButton">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.75h12v16.5l-6-3.7-6 3.7V3.75Z" /></svg>
-            <span>Save place</span>
-          </button>
-        </div>
-
         <header class="chapter-heading">
           <p class="arc-label" id="arcLabel">ARC 1</p>
           <h1 id="chapterTitle">Preparing your chapter</h1>
