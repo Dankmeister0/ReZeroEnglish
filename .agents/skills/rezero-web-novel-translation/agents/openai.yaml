@@ -1,0 +1,4 @@
+interface:
+  display_name: "Re:Zero Web Novel Translation"
+  short_description: "Translate newly published Re:Zero web-novel chapters"
+  default_prompt: "Use $rezero-web-novel-translation to translate any new Re:Zero source chapters in this repository."
